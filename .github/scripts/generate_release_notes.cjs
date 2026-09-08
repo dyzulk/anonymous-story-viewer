@@ -50,26 +50,69 @@ async function generate() {
     fs.rmSync(outputPath);
   }
 
-  const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ contents: [{ parts: [{ text: template }] }] }),
-    },
-  );
+  const candidateModels = [
+    'gemini-flash-latest',
+    'gemini-3.6-flash',
+    'gemini-3.5-flash',
+    'gemini-3.7-flash',
+    'gemini-flash-lite-latest',
+  ];
+  const requestBody = {
+    contents: [{ parts: [{ text: template }] }],
+  };
+  const failures = [];
+  let notes;
 
-  if (!response.ok) {
-    throw new Error(`Gemini API returned ${response.status}: ${await response.text()}`);
+  for (const modelName of candidateModels) {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
+
+    for (let attempt = 1; attempt <= 3; attempt += 1) {
+      try {
+        console.log(`Requesting Gemini model ${modelName} (attempt ${attempt}/3)...`);
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(requestBody),
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          failures.push(`${modelName} attempt ${attempt}: HTTP ${response.status} ${errorText}`);
+          if (response.status >= 500 || response.status === 429) {
+            await new Promise((resolve) => setTimeout(resolve, 2000));
+            continue;
+          }
+          break;
+        }
+
+        const data = await response.json();
+        const generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (generatedText?.trim()) {
+          notes = generatedText.trim();
+          console.log(`Release notes generated with Gemini model ${modelName}.`);
+          break;
+        }
+
+        failures.push(`${modelName} attempt ${attempt}: empty response`);
+      } catch (error) {
+        failures.push(`${modelName} attempt ${attempt}: ${error.message}`);
+        if (attempt < 3) {
+          await new Promise((resolve) => setTimeout(resolve, 2000));
+        }
+      }
+    }
+
+    if (notes) {
+      break;
+    }
   }
 
-  const data = await response.json();
-  const notes = data.candidates?.[0]?.content?.parts?.[0]?.text;
-  if (!notes?.trim()) {
-    throw new Error('Gemini returned empty release notes.');
+  if (!notes) {
+    throw new Error(`All Gemini models failed or returned empty content.\n${failures.join('\n')}`);
   }
+
   fs.writeFileSync(outputPath, notes.trim() + '\n');
-  console.log(`Release notes generated for ${releaseTag}.`);
+  console.log(`Release notes written for ${releaseTag}.`);
 }
 
 generate().catch((error) => {
