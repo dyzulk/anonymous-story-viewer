@@ -34,7 +34,7 @@ export function useStorage() {
   // Listen for storage changes from other contexts
   useEffect(() => {
     const listener = (
-      changes: Record<string, browser.storage.StorageChange>,
+      changes: Record<string, Browser.storage.StorageChange>,
       areaName: string,
     ) => {
       if (areaName !== 'local') return;
