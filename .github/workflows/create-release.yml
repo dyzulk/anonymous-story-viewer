@@ -1,0 +1,109 @@
+name: Build & Release Extension Packs
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: 'Existing release tag to build, for example v1.0.0'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+env:
+  RELEASE_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.tag_name || github.ref_name }}
+
+jobs:
+  build-and-release:
+    name: Build Extension Packs & Create Release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.tag_name || github.ref }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Set Release Version
+        run: |
+          set -euo pipefail
+          VERSION="${RELEASE_TAG#v}"
+          if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+([.-][0-9A-Za-z.-]+)?$ ]]; then
+            echo "Release tag must contain a semver version: $RELEASE_TAG"
+            exit 1
+          fi
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+          echo "Building $RELEASE_TAG (version $VERSION)"
+
+      - name: Patch Package Version
+        env:
+          RELEASE_VERSION: ${{ env.VERSION }}
+        run: |
+          node <<'NODE'
+          const fs = require('node:fs');
+          const file = 'package.json';
+          const version = process.env.RELEASE_VERSION;
+          const packageJson = JSON.parse(fs.readFileSync(file, 'utf8'));
+          if (!packageJson.version) {
+            throw new Error('Could not find version in package.json');
+          }
+          packageJson.version = version;
+          fs.writeFileSync(file, `${JSON.stringify(packageJson, null, 2)}\n`);
+          NODE
+
+      - name: Typecheck
+        run: pnpm compile
+
+      - name: Build Chrome Package
+        run: pnpm zip
+
+      - name: Build Firefox Package
+        run: pnpm zip:firefox
+
+      - name: Collect Release Artifacts
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+          cp ".output/anonymous-story-viewer-${VERSION}-chrome.zip" \
+            "dist/anonymous-story-viewer-${RELEASE_TAG}-chrome.zip"
+          cp ".output/anonymous-story-viewer-${VERSION}-firefox.zip" \
+            "dist/anonymous-story-viewer-${RELEASE_TAG}-firefox.zip"
+          ls -lh dist/
+
+      - name: Generate AI Release Notes via Gemini API
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_REF_NAME: ${{ env.RELEASE_TAG }}
+        run: node .github/scripts/generate_release_notes.cjs
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          body_path: release_notes.md
+          draft: false
+          prerelease: ${{ contains(env.RELEASE_TAG, 'beta') || contains(env.RELEASE_TAG, 'alpha') || contains(env.RELEASE_TAG, 'rc') }}
+          files: |
+            dist/anonymous-story-viewer-${{ env.RELEASE_TAG }}-chrome.zip
+            dist/anonymous-story-viewer-${{ env.RELEASE_TAG }}-firefox.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
