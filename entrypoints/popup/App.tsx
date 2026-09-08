@@ -1,6 +1,5 @@
 import { useState } from 'react';
-import reactLogo from '@/assets/react.svg';
-import wxtLogo from '/wxt.svg';
+import logo from '@/assets/logo.svg';
 import './App.css';
 
 function App() {
@@ -9,14 +8,9 @@ function App() {
   return (
     <>
       <div>
-        <a href="https://wxt.dev" target="_blank">
-          <img src={wxtLogo} className="logo" alt="WXT logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+        <img src={logo} className="logo" alt="Anonymous Story Viewer logo" />
       </div>
-      <h1>WXT + React</h1>
+      <h1>Anonymous Story Viewer</h1>
       <div className="card">
         <button onClick={() => setCount((count) => count + 1)}>
           count is {count}
@@ -26,7 +20,7 @@ function App() {
         </p>
       </div>
       <p className="read-the-docs">
-        Click on the WXT and React logos to learn more
+        Anonymous Story Viewer
       </p>
     </>
   );
