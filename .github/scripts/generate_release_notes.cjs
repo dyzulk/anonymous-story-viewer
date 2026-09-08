@@ -7,6 +7,7 @@ const outputPath = path.join(root, 'release_notes.md');
 const templatePath = path.join(root, '.github', 'release-prompt-template.md');
 const repository = process.env.GITHUB_REPOSITORY || 'dyzulk/anonymous-story-viewer';
 const releaseTag = process.env.GITHUB_REF_NAME || 'v0.0.0';
+const requestTimeoutMs = 30_000;
 
 function git(...args) {
   return execFileSync('git', args, { encoding: 'utf8' }).trim();
@@ -40,7 +41,7 @@ async function generate() {
   const template = fs.readFileSync(templatePath, 'utf8')
     .replace('{{COMMIT_LOG}}', commitLog)
     .replace('{{ARTIFACT_TABLE}}', artifactTable());
-  const apiKey = process.env.GEMINI_API_KEY;
+  const apiKey = process.env.GEMINI_API_KEY || loadLocalApiKey();
 
   if (!apiKey) {
     throw new Error('GEMINI_API_KEY is not configured. Gemini is required to generate release notes.');
@@ -69,10 +70,12 @@ async function generate() {
     for (let attempt = 1; attempt <= 3; attempt += 1) {
       try {
         console.log(`Requesting Gemini model ${modelName} (attempt ${attempt}/3)...`);
+        const signal = AbortSignal.timeout(requestTimeoutMs);
         const response = await fetch(url, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(requestBody),
+          signal,
         });
 
         if (!response.ok) {
@@ -113,6 +116,16 @@ async function generate() {
 
   fs.writeFileSync(outputPath, notes.trim() + '\n');
   console.log(`Release notes written for ${releaseTag}.`);
+}
+
+function loadLocalApiKey() {
+  const envPath = path.join(root, '.env');
+  if (!fs.existsSync(envPath)) {
+    return undefined;
+  }
+
+  const match = fs.readFileSync(envPath, 'utf8').match(/^GEMINI_API_KEY=(.+)$/m);
+  return match?.[1]?.trim();
 }
 
 generate().catch((error) => {
