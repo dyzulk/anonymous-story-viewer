@@ -13,7 +13,8 @@
     "zip:firefox": "wxt zip -b firefox",
     "compile": "tsc --noEmit",
     "postinstall": "wxt prepare",
-    "generate:logo": "tsx scripts/create-logo/index.ts"
+    "generate:logo": "tsx scripts/create-logo/index.ts",
+    "generate:disabled-icons": "tsx scripts/create-disabled-icons/index.ts"
   },
   "dependencies": {
     "@fontsource-variable/inter": "^5.3.0",

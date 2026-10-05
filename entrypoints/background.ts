@@ -1,31 +1,36 @@
 import { STORAGE_DEFAULTS } from '@/lib/storage';
-import type { PlatformState } from '@/lib/storage';
 
 export default defineBackground(() => {
   // Initialize storage on first install
   browser.runtime.onInstalled.addListener(async () => {
     await browser.storage.local.set(STORAGE_DEFAULTS);
-    await updateBadge(false);
+    await updateIcon(STORAGE_DEFAULTS.isActive);
   });
 
-  // Sync badge with storage on startup
+  // Sync icon with storage on startup
   browser.storage.local.get(null).then((data) => {
     const isActive = (data.isActive as boolean) ?? false;
-    updateBadge(isActive);
+    updateIcon(isActive);
   });
 
-  // Listen for storage changes and update badge
+  // Listen for storage changes and update icon
   browser.storage.onChanged.addListener((changes, areaName) => {
     if (areaName !== 'local') return;
     if (changes.isActive !== undefined) {
-      updateBadge(changes.isActive.newValue as boolean);
+      updateIcon(changes.isActive.newValue as boolean);
     }
   });
 });
 
-async function updateBadge(isActive: boolean) {
-  await browser.action.setBadgeText({ text: isActive ? 'On' : 'Off' });
-  await browser.action.setBadgeBackgroundColor({
-    color: isActive ? '#0097ff' : '#777',
+async function updateIcon(isActive: boolean) {
+  const folder = isActive ? 'icon' : 'icon-disabled';
+  await browser.action.setIcon({
+    path: {
+      16: `/${folder}/16.png`,
+      32: `/${folder}/32.png`,
+      48: `/${folder}/48.png`,
+      128: `/${folder}/128.png`,
+    },
   });
 }
+
