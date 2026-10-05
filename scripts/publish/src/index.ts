@@ -29,8 +29,11 @@ function parseArgs(argv: string[]): CliArgs {
   const args: Record<string, string> = {};
   for (let i = 2; i < argv.length; i++) {
     const arg = argv[i];
-    if (arg.startsWith('--') && i + 1 < argv.length) {
-      args[arg.slice(2)] = argv[++i];
+    if (arg && arg.startsWith('--') && i + 1 < argv.length) {
+      const nextVal = argv[++i];
+      if (nextVal !== undefined) {
+        args[arg.slice(2)] = nextVal;
+      }
     }
   }
 
