@@ -94,7 +94,7 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GITHUB_REPOSITORY: ${{ github.repository }}
           GITHUB_REF_NAME: ${{ env.RELEASE_TAG }}
-        run: node .github/scripts/generate_release_notes.cjs
+        run: node .github/scripts/generate-release-notes/index.cjs
 
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
