@@ -1,26 +1,47 @@
 <p align="center">
-  <img src="public/icon/128.png" alt="Anonymous Story Viewer" width="80" />
+  <img alt="Anonymous Story Viewer" src="assets/logo.svg" width="100" />
 </p>
 
 <h1 align="center">Anonymous Story Viewer</h1>
 
 <p align="center">
-  <strong>View Instagram and Facebook stories without leaving a trace.</strong>
+  View Instagram and Facebook stories without leaving a trace &mdash; silent, client-side, zero tracking.
 </p>
 
 <p align="center">
   <a href="https://github.com/dyzulk/anonymous-story-viewer/releases/latest">
-    <img src="https://img.shields.io/github/v/release/dyzulk/anonymous-story-viewer?style=for-the-badge&color=0097ff" alt="Latest Release" />
+    <img src="https://img.shields.io/github/v/release/dyzulk/anonymous-story-viewer?style=for-the-badge&label=Version&color=0097ff" alt="Latest Release" />
   </a>
-  <a href="LICENSE">
-    <img src="https://img.shields.io/github/license/dyzulk/anonymous-story-viewer?style=for-the-badge&color=6366f1" alt="License" />
+  <a href="https://github.com/dyzulk/anonymous-story-viewer/blob/main/LICENSE">
+    <img src="https://img.shields.io/github/license/dyzulk/anonymous-story-viewer?style=for-the-badge&color=6366f1" alt="MIT License" />
+  </a>
+  <a href="https://github.com/dyzulk/anonymous-story-viewer/stargazers">
+    <img src="https://img.shields.io/github/stars/dyzulk/anonymous-story-viewer?style=for-the-badge&color=0097ff" alt="Stars" />
+  </a>
+  <a href="https://github.com/dyzulk/anonymous-story-viewer/commits/main">
+    <img src="https://img.shields.io/github/last-commit/dyzulk/anonymous-story-viewer?style=for-the-badge&color=6366f1" alt="Last Commit" />
+  </a>
+  <a href="https://github.com/dyzulk/anonymous-story-viewer/actions/workflows/create-release.yml">
+    <img src="https://img.shields.io/github/actions/workflow/status/dyzulk/anonymous-story-viewer/create-release.yml?style=for-the-badge&label=Build&color=0097ff" alt="Build Status" />
+  </a>
+</p>
+
+<p align="center">
+  <a href="https://chromewebstore.google.com/detail/anonymous-story-viewer/ehgnmpihpelidmmblpamihdaajbbeehf">
+    <img src="https://img.shields.io/badge/Chrome_Web_Store-Available-4285F4?style=for-the-badge&logo=googlechrome&logoColor=white" alt="Chrome Web Store" />
+  </a>
+  <a href="https://microsoftedge.microsoft.com/addons/detail/anonymous-story-viewer/cfieebihkobiagnhmodjpljpdkjnbhbm">
+    <img src="https://img.shields.io/badge/Edge_Add--ons-Available-0078D7?style=for-the-badge&logo=microsoftedge&logoColor=white" alt="Edge Add-ons" />
+  </a>
+  <a href="https://addons.mozilla.org/en-US/firefox/addon/anon-story-viewer/">
+    <img src="https://img.shields.io/badge/Firefox_Add--ons-Available-FF7139?style=for-the-badge&logo=firefoxbrowser&logoColor=white" alt="Firefox Add-ons" />
   </a>
 </p>
 
 <br />
 
 <p align="center">
-  <img src="https://skillicons.dev/icons?i=react,ts,tailwind,vite&theme=dark" alt="Tech Stack" />
+  <img src="https://skillicons.dev/icons?i=react,ts,tailwind,vite,nodejs,github,githubactions&theme=dark" alt="Tech Stack" />
 </p>
 
 <br />
@@ -61,6 +82,7 @@ Built with [WXT](https://wxt.dev/), React 19, TypeScript, and [shadcn/ui](https:
 - **Mobile-friendly popup** &mdash; responsive layout that works in Edge Mobile's drawer popup
 - **Zero data collection** &mdash; everything runs locally, nothing is sent anywhere
 - **Cross-browser support** &mdash; Chrome, Edge, Brave, Vivaldi, Opera, and Firefox
+- **Automated releases** &mdash; CI/CD pipeline builds extension packs, generates release notes via Gemini API, publishes GitHub Releases, and automatically submits updates to Chrome Web Store, Edge Add-ons, and Mozilla Firefox AMO
 
 ---
 
@@ -78,14 +100,23 @@ The result: Instagram and Facebook think the request succeeded, but the "seen" d
 
 ## Installation
 
+### Browser Extension Stores
+
+| Store | Link |
+|:---|:---|
+| Chrome Web Store | [Install for Chrome](https://chromewebstore.google.com/detail/anonymous-story-viewer/ehgnmpihpelidmmblpamihdaajbbeehf) |
+| Microsoft Edge Add-ons | [Install for Edge](https://microsoftedge.microsoft.com/addons/detail/anonymous-story-viewer/cfieebihkobiagnhmodjpljpdkjnbhbm) |
+| Firefox Add-ons | [Install for Firefox](https://addons.mozilla.org/en-US/firefox/addon/anon-story-viewer/) |
+
 ### Manual Installation via GitHub Releases
 
-Pre-built extension packages are attached to every [GitHub Release](https://github.com/dyzulk/anonymous-story-viewer/releases/latest):
+Pre-built extension packages are attached to every [GitHub Release](https://github.com/dyzulk/anonymous-story-viewer/releases/latest). Download the artifact that matches your browser:
 
 | Artifact | Browser | Instructions |
 |:---|:---|:---|
 | `anonymous-story-viewer-*-chrome.zip` | Chrome, Edge, Brave, Vivaldi, Opera | Unzip, then load via `chrome://extensions` with **Developer mode** enabled |
 | `anonymous-story-viewer-*-firefox.zip` | Firefox | Load as a temporary add-on via `about:debugging#/runtime/this-firefox` |
+| `anonymous-story-viewer-*-sources.zip` | All | Source code bundle attached to release |
 
 ---
 
@@ -184,6 +215,12 @@ anonymous-story-viewer/
     logo.svg                      Extension logo
   public/
     icon/                         Extension icons (16–128px)
+  scripts/
+    publish/                      TypeScript publisher CLI scripts for Chrome, Edge & Firefox AMO
+  .github/
+    workflows/
+      create-release.yml          CI/CD: build extension packs, generate AI release notes, create GitHub Release
+      publish-stores.yml          CI/CD: publish extension packages to Chrome Web Store, Edge Add-ons & Mozilla AMO
 ```
 
 The extension follows a three-layer architecture:
@@ -196,7 +233,7 @@ The extension follows a three-layer architecture:
 
 ## Contributing
 
-Contributions are welcome. Please read the [Contributing Guide](CONTRIBUTING.md) before submitting a pull request.
+Contributions are welcome. Whether you are fixing a bug, adding a new feature, or improving documentation, please review the [Contributing Guide](CONTRIBUTING.md) before submitting a pull request.
 
 To report a bug or request a feature, open an issue on [GitHub Issues](https://github.com/dyzulk/anonymous-story-viewer/issues).
 
