@@ -1,0 +1,90 @@
+.hero {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border-bottom: 1px solid var(--border);
+  background-color: var(--background);
+}
+
+.mesh,
+.halftone {
+  position: absolute;
+  z-index: -1;
+  pointer-events: none;
+  inset: 0;
+}
+
+.mesh {
+  background:
+    radial-gradient(
+      ellipse at 74% 31%,
+      color-mix(in oklab, var(--chart-2) 38%, transparent),
+      transparent 38%
+    ),
+    radial-gradient(
+      ellipse at 93% 61%,
+      color-mix(in oklab, var(--chart-4) 32%, transparent),
+      transparent 36%
+    ),
+    radial-gradient(
+      ellipse at 54% 83%,
+      color-mix(in oklab, var(--chart-1) 24%, transparent),
+      transparent 42%
+    );
+}
+
+.halftone {
+  inset: 2rem 0 0 auto;
+  width: min(66vw, 880px);
+  background-image: radial-gradient(
+    circle,
+    color-mix(in oklab, var(--foreground) 52%, transparent) 1.2px,
+    transparent 1.55px
+  );
+  background-position: center;
+  background-size: 8px 8px;
+  mask-image: radial-gradient(
+    ellipse 44% 62% at 72% 42%,
+    #000 24%,
+    rgb(0 0 0 / 78%) 54%,
+    transparent 100%
+  );
+  opacity: 0.62;
+}
+
+@media (max-width: 767px) {
+  .mesh {
+    background:
+      radial-gradient(
+        ellipse at 88% 26%,
+        color-mix(in oklab, var(--chart-2) 32%, transparent),
+        transparent 45%
+      ),
+      radial-gradient(
+        ellipse at 18% 66%,
+        color-mix(in oklab, var(--chart-4) 24%, transparent),
+        transparent 38%
+      );
+  }
+
+  .halftone {
+    inset: 0 -12rem auto auto;
+    width: 36rem;
+    height: 38rem;
+    background-size: 7px 7px;
+    mask-image: radial-gradient(
+      circle at 62% 32%,
+      #000 15%,
+      rgb(0 0 0 / 70%) 48%,
+      transparent 76%
+    );
+    opacity: 0.48;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .mesh,
+  .halftone {
+    opacity: 0.3;
+  }
+}
