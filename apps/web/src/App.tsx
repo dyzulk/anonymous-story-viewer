@@ -1,5 +1,6 @@
 import { BackToTopButton } from "@/components/back-to-top-button"
 import { SectionDownload } from "@/components/section-download"
+import { SectionDeveloperGuide } from "@/components/section-developer-guide"
 import { SectionFaq } from "@/components/section-faq"
 import { SectionFeatures } from "@/components/section-features"
 import { SectionHero } from "@/components/section-hero"
@@ -25,6 +26,7 @@ export function App() {
         <SectionHero />
         <SectionFeatures />
         <SectionHowItWorks />
+        <SectionDeveloperGuide />
         <SectionPrivacy />
         <SectionFaq />
         <SectionDownload />

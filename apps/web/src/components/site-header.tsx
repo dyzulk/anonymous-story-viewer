@@ -5,6 +5,7 @@ import { ThemeToggle } from "@/components/theme-toggle"
 const navigation = [
   { href: "#features", label: "Features" },
   { href: "#how-it-works", label: "How it works" },
+  { href: "#developer-guide", label: "For developers" },
   { href: "#privacy", label: "Privacy" },
   { href: "#faq", label: "FAQ" },
 ]
