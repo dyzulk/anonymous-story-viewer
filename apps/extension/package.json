@@ -1,0 +1,47 @@
+{
+  "name": "anonymous-story-viewer",
+  "description": "View Instagram and Facebook stories anonymously.",
+  "private": true,
+  "version": "2.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "wxt",
+    "dev:firefox": "wxt -b firefox",
+    "build": "wxt build",
+    "build:firefox": "wxt build -b firefox",
+    "zip": "wxt zip",
+    "zip:firefox": "wxt zip -b firefox",
+    "compile": "tsc --noEmit",
+    "typecheck": "tsc --noEmit",
+    "postinstall": "wxt prepare",
+    "generate:logo": "tsx scripts/create-logo/index.ts",
+    "generate:disabled-icons": "tsx scripts/create-disabled-icons/index.ts",
+    "generate:store-assets": "tsx scripts/create-store-assets/index.ts",
+    "publish:chrome": "tsx scripts/publish/src/index.ts --store chrome",
+    "publish:edge": "tsx scripts/publish/src/index.ts --store edge",
+    "publish:firefox": "tsx scripts/publish/src/index.ts --store firefox",
+    "publish:all": "tsx scripts/publish/src/index.ts --store all"
+  },
+  "dependencies": {
+    "@workspace/ui": "workspace:*",
+    "@icons-pack/react-simple-icons": "^13.15.1",
+    "@tailwindcss/vite": "^4.3.3",
+    "lucide-react": "^1.42.0",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "tailwindcss": "^4.3.3"
+  },
+  "devDependencies": {
+    "@types/node": "^26.4.1",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.1.1",
+    "@wxt-dev/module-react": "^1.1.5",
+    "png-to-ico": "^3.0.2",
+    "sharp": "^0.35.4",
+    "tsx": "^4.23.13",
+    "typescript": "^5.9.3",
+    "web-ext": "^10.5.0",
+    "wxt": "^0.21.3"
+  }
+}

@@ -60,7 +60,7 @@ jobs:
         run: |
           node <<'NODE'
           const fs = require('node:fs');
-          const file = 'package.json';
+          const file = 'apps/extension/package.json';
           const version = process.env.RELEASE_VERSION;
           const packageJson = JSON.parse(fs.readFileSync(file, 'utf8'));
           if (!packageJson.version) {
@@ -83,9 +83,9 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p dist
-          cp ".output/anonymous-story-viewer-${VERSION}-chrome.zip" \
+          cp "apps/extension/.output/anonymous-story-viewer-${VERSION}-chrome.zip" \
             "dist/anonymous-story-viewer-${RELEASE_TAG}-chrome.zip"
-          cp ".output/anonymous-story-viewer-${VERSION}-firefox.zip" \
+          cp "apps/extension/.output/anonymous-story-viewer-${VERSION}-firefox.zip" \
             "dist/anonymous-story-viewer-${RELEASE_TAG}-firefox.zip"
           ls -lh dist/
 

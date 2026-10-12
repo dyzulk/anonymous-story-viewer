@@ -42,7 +42,7 @@ All contributors are expected to be respectful and constructive in all interacti
    pnpm dev:firefox
    ```
 
-5. Load the extension from `.output/chrome-mv3-dev` or `.output/firefox-mv2-dev` in your browser's extension developer page.
+5. Load the extension from `apps/extension/.output/chrome-mv3-dev` or `apps/extension/.output/firefox-mv2-dev` in your browser's extension developer page.
 
 ---
 
@@ -77,7 +77,7 @@ Anonymous Story Viewer uses a mutation-detection approach to block "story seen" 
 
 ### 1. Update the Mutation Detector
 
-Edit [`lib/seen-mutation.ts`](lib/seen-mutation.ts) and add detection logic for the new platform:
+Edit [`apps/extension/lib/seen-mutation.ts`](apps/extension/lib/seen-mutation.ts) and add detection logic for the new platform:
 
 ```typescript
 export type Platform = 'instagram' | 'facebook' | 'newplatform';
@@ -97,7 +97,7 @@ function matchesNewPlatformSeen(text: string): boolean {
 
 ### 2. Update the Storage Schema
 
-Add the new platform to [`lib/storage.ts`](lib/storage.ts):
+Add the new platform to [`apps/extension/lib/storage.ts`](apps/extension/lib/storage.ts):
 
 ```typescript
 export interface PlatformState {
@@ -120,12 +120,12 @@ export const STORAGE_DEFAULTS: StorageState = {
 
 Update both content scripts to include the new domain:
 
-- [`entrypoints/isolated.content.ts`](entrypoints/isolated.content.ts) &mdash; add `*://*.newplatform.com/*` to `matches`
-- [`entrypoints/interceptor.content/index.ts`](entrypoints/interceptor.content/index.ts) &mdash; add `*://*.newplatform.com/*` to `matches`
+- [`apps/extension/entrypoints/isolated.content.ts`](apps/extension/entrypoints/isolated.content.ts) &mdash; add `*://*.newplatform.com/*` to `matches`
+- [`apps/extension/entrypoints/interceptor.content/index.ts`](apps/extension/entrypoints/interceptor.content/index.ts) &mdash; add `*://*.newplatform.com/*` to `matches`
 
 ### 4. Update the Manifest
 
-Add host permissions in [`wxt.config.ts`](wxt.config.ts):
+Add host permissions in [`apps/extension/wxt.config.ts`](apps/extension/wxt.config.ts):
 
 ```typescript
 host_permissions: [
@@ -137,7 +137,9 @@ host_permissions: [
 
 ### 5. Add a Platform Toggle in the Popup
 
-Add a new toggle row in [`entrypoints/popup/components/Body.tsx`](entrypoints/popup/components/Body.tsx) with the appropriate icon and label.
+Add a new toggle row in [`apps/extension/entrypoints/popup/components/Body.tsx`](apps/extension/entrypoints/popup/components/Body.tsx) with the appropriate icon and label.
+
+Shared shadcn/ui components and the Tailwind theme live in `packages/ui`; import shared components from `@workspace/ui` and load its `globals.css` in each app.
 
 ### 6. Test Thoroughly
 

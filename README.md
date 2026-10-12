@@ -1,5 +1,5 @@
 <p align="center">
-  <img alt="Anonymous Story Viewer" src="assets/logo.svg" width="100" />
+  <img alt="Anonymous Story Viewer" src="apps/extension/assets/logo.svg" width="100" />
 </p>
 
 <h1 align="center">Anonymous Story Viewer</h1>
@@ -160,7 +160,7 @@ pnpm dev
 pnpm dev:firefox
 ```
 
-The unpacked extension output is written to `.output/chrome-mv3` or `.output/firefox-mv2`. Load it via your browser's extension developer page.
+The unpacked extension output is written to `apps/extension/.output/chrome-mv3` or `apps/extension/.output/firefox-mv2`. Load it via your browser's extension developer page.
 
 </details>
 
@@ -171,7 +171,7 @@ The unpacked extension output is written to `.output/chrome-mv3` or `.output/fir
 
 ```bash
 # Build without packaging
-pnpm build              # Chrome
+pnpm build:extension    # Chrome
 pnpm build:firefox      # Firefox
 
 # Build and create distributable ZIP archives
@@ -179,7 +179,21 @@ pnpm zip                # Chrome
 pnpm zip:firefox        # Firefox
 ```
 
-Output artifacts are placed in the `.output/` directory.
+Output artifacts are placed in `apps/extension/.output/`.
+
+</details>
+
+<details>
+<summary><strong>Website</strong></summary>
+
+<br />
+
+```bash
+pnpm dev:web
+pnpm build:web
+```
+
+The website is in `apps/web`; both it and the extension import shadcn/ui components and Tailwind theme from `packages/ui`.
 
 </details>
 
@@ -189,34 +203,20 @@ Output artifacts are placed in the `.output/` directory.
 
 ```
 anonymous-story-viewer/
-  entrypoints/
-    background.ts                 Service worker: storage initialization, badge sync
-    isolated.content.ts           Content script (ISOLATED): bridges storage to main world
-    interceptor.content/
-      index.ts                    Content script (MAIN): XHR/Fetch interception
-    popup/                        React popup UI
-      App.tsx                     Root component (Header + Body + Footer)
-      main.tsx                    React entry point with ThemeProvider
-      components/
-        Header.tsx                Logo, title, theme toggle
-        Body.tsx                  Master switch, platform toggles, status
-        Footer.tsx                Version, credits
-  components/
-    theme-provider.tsx            Dark/light/system theme context
-    ui/                           shadcn/ui primitives (Button, Switch, Card, Badge)
-  hooks/
-    use-storage.ts                Reactive hook for chrome.storage.local
-  lib/
-    storage.ts                    Storage types, defaults, constants
-    seen-mutation.ts              Story-seen mutation detection logic
-    utils.ts                      Tailwind CSS utilities
-  assets/
-    index.css                     shadcn design system (Tailwind v4)
-    logo.svg                      Extension logo
-  public/
-    icon/                         Extension icons (16–128px)
-  scripts/
-    publish/                      TypeScript publisher CLI scripts for Chrome, Edge & Firefox AMO
+  apps/
+    extension/
+      entrypoints/                WXT background, content scripts, and popup
+      components/                 Extension-only theme provider
+      hooks/                      Reactive hook for chrome.storage.local
+      lib/                        Storage and story-seen detection
+      assets/                     Extension logo and store assets
+      public/                      Extension icons
+      scripts/                    Asset and store-publishing scripts
+    web/                          Vite website
+  packages/
+    ui/
+      src/components/              Shared shadcn/ui components
+      src/styles/globals.css       Shared Tailwind v4 design system for extension and web
   .github/
     workflows/
       create-release.yml          CI/CD: build extension packs, generate AI release notes, create GitHub Release
@@ -227,7 +227,7 @@ The extension follows a three-layer architecture:
 
 1. **Content Scripts** &mdash; two scripts operating in different worlds. The isolated script bridges `chrome.storage` state; the main world script intercepts and blocks "seen" API mutations.
 2. **Background Service Worker** &mdash; initializes storage on install and keeps the badge icon in sync with the current toggle state.
-3. **Popup UI** &mdash; a React application with shadcn/ui components that provides a clean interface for toggling blocking per platform, with dark/light theme support.
+3. **Popup UI** &mdash; a React application using shared shadcn/ui components and design tokens, with dark/light theme support.
 
 ---
 

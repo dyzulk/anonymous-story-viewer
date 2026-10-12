@@ -58,9 +58,9 @@ jobs:
         run: |
           node -e "
             const fs = require('fs');
-            const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+            const pkg = JSON.parse(fs.readFileSync('apps/extension/package.json', 'utf8'));
             pkg.version = process.env.VERSION;
-            fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n');
+            fs.writeFileSync('apps/extension/package.json', JSON.stringify(pkg, null, 2) + '\n');
           "
 
       - name: Typecheck
@@ -78,9 +78,9 @@ jobs:
           name: extension-packages
           retention-days: 1
           path: |
-            .output/*-chrome.zip
-            .output/*-firefox.zip
-            .output/*-sources.zip
+            apps/extension/.output/*-chrome.zip
+            apps/extension/.output/*-firefox.zip
+            apps/extension/.output/*-sources.zip
 
   # ─── Stage 2: Publish to Chrome Web Store ──────────────────────
   publish-chrome:
@@ -122,7 +122,7 @@ jobs:
           CHROME_REFRESH_TOKEN: ${{ secrets.CHROME_REFRESH_TOKEN }}
         run: |
           VERSION="${{ needs.build.outputs.version }}"
-          pnpm tsx scripts/publish/src/index.ts \
+          pnpm --filter anonymous-story-viewer exec tsx scripts/publish/src/index.ts \
             --store chrome \
             --zip ".output/anonymous-story-viewer-${VERSION}-chrome.zip" \
             --version "$VERSION"
@@ -166,7 +166,7 @@ jobs:
           EDGE_API_KEY: ${{ secrets.EDGE_API_KEY }}
         run: |
           VERSION="${{ needs.build.outputs.version }}"
-          pnpm tsx scripts/publish/src/index.ts \
+          pnpm --filter anonymous-story-viewer exec tsx scripts/publish/src/index.ts \
             --store edge \
             --zip ".output/anonymous-story-viewer-${VERSION}-chrome.zip" \
             --version "$VERSION"
@@ -210,7 +210,7 @@ jobs:
           AMO_JWT_SECRET: ${{ secrets.AMO_JWT_SECRET }}
         run: |
           VERSION="${{ needs.build.outputs.version }}"
-          pnpm tsx scripts/publish/src/index.ts \
+          pnpm --filter anonymous-story-viewer exec tsx scripts/publish/src/index.ts \
             --store firefox \
             --zip-firefox ".output/anonymous-story-viewer-${VERSION}-firefox.zip" \
             --version "$VERSION"
