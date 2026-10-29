@@ -12,9 +12,9 @@ Pastikan seluruh secret berikut telah diisi pada menu **Settings > Secrets and v
 | :--- | :--- | :--- |
 | `GEMINI_API_KEY` | API Key Google Gemini untuk pembuat AI Release Notes | GitHub Release Page |
 | `CHROME_EXTENSION_ID` | Extension ID di Chrome Web Store | Chrome Web Store |
-| `CHROME_CLIENT_ID` | OAuth Client ID Google Cloud Platform | Chrome Web Store |
-| `CHROME_CLIENT_SECRET` | OAuth Client Secret Google Cloud Platform | Chrome Web Store |
-| `CHROME_REFRESH_TOKEN` | OAuth Refresh Token akun developer Chrome | Chrome Web Store |
+| `CHROME_PUBLISHER_ID` | Publisher ID akun developer Chrome Web Store | Chrome Web Store (API v2) |
+| `CHROME_SERVICE_ACCOUNT_CLIENT_EMAIL` | Client Email Service Account Google Cloud | Chrome Web Store (API v2) |
+| `CHROME_SERVICE_ACCOUNT_PRIVATE_KEY` | Private Key Service Account Google Cloud (JSON) | Chrome Web Store (API v2) |
 | `EDGE_PRODUCT_ID` | Product ID di Partner Center | Edge Add-ons |
 | `EDGE_CLIENT_ID` | Client ID Publish API di Partner Center | Edge Add-ons |
 | `EDGE_API_KEY` | API Key Publish API di Partner Center | Edge Add-ons |
