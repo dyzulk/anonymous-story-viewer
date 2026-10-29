@@ -114,7 +114,7 @@ jobs:
           name: extension-packages
           path: .output
 
-      - name: Publish to Chrome
+      - name: Publish to Chrome Web Store
         env:
           CHROME_EXTENSION_ID: ${{ secrets.CHROME_EXTENSION_ID }}
           CHROME_CLIENT_ID: ${{ secrets.CHROME_CLIENT_ID }}
@@ -122,10 +122,7 @@ jobs:
           CHROME_REFRESH_TOKEN: ${{ secrets.CHROME_REFRESH_TOKEN }}
         run: |
           VERSION="${{ needs.build.outputs.version }}"
-          pnpm --filter anonymous-story-viewer exec tsx scripts/publish/src/index.ts \
-            --store chrome \
-            --zip ".output/anonymous-story-viewer-${VERSION}-chrome.zip" \
-            --version "$VERSION"
+          pnpm submit:chrome ".output/anonymous-story-viewer-${VERSION}-chrome.zip"
 
   # ─── Stage 2: Publish to Edge Add-ons ──────────────────────────
   publish-edge:
@@ -159,17 +156,14 @@ jobs:
           name: extension-packages
           path: .output
 
-      - name: Publish to Edge
+      - name: Publish to Edge Add-ons
         env:
           EDGE_PRODUCT_ID: ${{ secrets.EDGE_PRODUCT_ID }}
           EDGE_CLIENT_ID: ${{ secrets.EDGE_CLIENT_ID }}
           EDGE_API_KEY: ${{ secrets.EDGE_API_KEY }}
         run: |
           VERSION="${{ needs.build.outputs.version }}"
-          pnpm --filter anonymous-story-viewer exec tsx scripts/publish/src/index.ts \
-            --store edge \
-            --zip ".output/anonymous-story-viewer-${VERSION}-chrome.zip" \
-            --version "$VERSION"
+          pnpm submit:edge ".output/anonymous-story-viewer-${VERSION}-chrome.zip"
 
   # ─── Stage 2: Publish to Mozilla AMO ───────────────────────────
   publish-firefox:
@@ -184,7 +178,7 @@ jobs:
           ref: ${{ env.RELEASE_TAG }}
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v4c
         with:
           version: 11
 
@@ -203,14 +197,12 @@ jobs:
           name: extension-packages
           path: .output
 
-      - name: Publish to Firefox
+      - name: Publish to Mozilla AMO
         env:
-          AMO_EXTENSION_ID: ${{ secrets.AMO_EXTENSION_ID }}
-          AMO_JWT_ISSUER: ${{ secrets.AMO_JWT_ISSUER }}
-          AMO_JWT_SECRET: ${{ secrets.AMO_JWT_SECRET }}
+          FIREFOX_EXTENSION_ID: ${{ secrets.AMO_EXTENSION_ID }}
+          FIREFOX_JWT_ISSUER: ${{ secrets.AMO_JWT_ISSUER }}
+          FIREFOX_JWT_SECRET: ${{ secrets.AMO_JWT_SECRET }}
         run: |
           VERSION="${{ needs.build.outputs.version }}"
-          pnpm --filter anonymous-story-viewer exec tsx scripts/publish/src/index.ts \
-            --store firefox \
-            --zip-firefox ".output/anonymous-story-viewer-${VERSION}-firefox.zip" \
-            --version "$VERSION"
+          pnpm submit:firefox ".output/anonymous-story-viewer-${VERSION}-firefox.zip" \
+            --firefox-sources-zip ".output/anonymous-story-viewer-${VERSION}-sources.zip"

@@ -17,10 +17,10 @@
     "generate:logo": "tsx scripts/create-logo/index.ts",
     "generate:disabled-icons": "tsx scripts/create-disabled-icons/index.ts",
     "generate:store-assets": "tsx scripts/create-store-assets/index.ts",
-    "publish:chrome": "tsx scripts/publish/src/index.ts --store chrome",
-    "publish:edge": "tsx scripts/publish/src/index.ts --store edge",
-    "publish:firefox": "tsx scripts/publish/src/index.ts --store firefox",
-    "publish:all": "tsx scripts/publish/src/index.ts --store all"
+    "submit": "wxt submit",
+    "submit:chrome": "wxt submit --chrome-zip",
+    "submit:edge": "wxt submit --edge-zip",
+    "submit:firefox": "wxt submit --firefox-zip"
   },
   "dependencies": {
     "@workspace/ui": "workspace:*",
