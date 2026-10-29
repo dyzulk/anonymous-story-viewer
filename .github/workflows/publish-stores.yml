@@ -56,8 +56,9 @@ jobs:
           CHROME_EXTENSION_ID: ${{ secrets.CHROME_EXTENSION_ID }}
           CHROME_PUBLISHER_ID: ${{ secrets.CHROME_PUBLISHER_ID }}
           CHROME_SERVICE_ACCOUNT_CLIENT_EMAIL: ${{ secrets.CHROME_SERVICE_ACCOUNT_CLIENT_EMAIL }}
-          CHROME_SERVICE_ACCOUNT_PRIVATE_KEY: ${{ secrets.CHROME_SERVICE_ACCOUNT_PRIVATE_KEY }}
+          CHROME_RAW_PRIVATE_KEY: ${{ secrets.CHROME_SERVICE_ACCOUNT_PRIVATE_KEY }}
         run: |
+          export CHROME_SERVICE_ACCOUNT_PRIVATE_KEY="$(node -e 'console.log(process.env.CHROME_RAW_PRIVATE_KEY.replace(/\\n/g, "\n").trim())')"
           pnpm submit:chrome "$GITHUB_WORKSPACE/dist/anonymous-story-viewer-${RELEASE_TAG}-chrome.zip"
 
       # ─── Step 2: Edge Add-ons ───
