@@ -58,7 +58,7 @@ jobs:
           CHROME_SERVICE_ACCOUNT_CLIENT_EMAIL: ${{ secrets.CHROME_SERVICE_ACCOUNT_CLIENT_EMAIL }}
           CHROME_SERVICE_ACCOUNT_PRIVATE_KEY: ${{ secrets.CHROME_SERVICE_ACCOUNT_PRIVATE_KEY }}
         run: |
-          pnpm submit:chrome "dist/anonymous-story-viewer-${RELEASE_TAG}-chrome.zip"
+          pnpm submit:chrome "$GITHUB_WORKSPACE/dist/anonymous-story-viewer-${RELEASE_TAG}-chrome.zip"
 
       # ─── Step 2: Edge Add-ons ───
       - name: Publish to Edge Add-ons
@@ -67,7 +67,7 @@ jobs:
           EDGE_CLIENT_ID: ${{ secrets.EDGE_CLIENT_ID }}
           EDGE_API_KEY: ${{ secrets.EDGE_API_KEY }}
         run: |
-          pnpm submit:edge "dist/anonymous-story-viewer-${RELEASE_TAG}-chrome.zip"
+          pnpm submit:edge "$GITHUB_WORKSPACE/dist/anonymous-story-viewer-${RELEASE_TAG}-chrome.zip"
 
       # ─── Step 3: Mozilla AMO ───
       - name: Publish to Mozilla AMO
@@ -76,5 +76,5 @@ jobs:
           FIREFOX_JWT_ISSUER: ${{ secrets.AMO_JWT_ISSUER }}
           FIREFOX_JWT_SECRET: ${{ secrets.AMO_JWT_SECRET }}
         run: |
-          pnpm submit:firefox "dist/anonymous-story-viewer-${RELEASE_TAG}-firefox.zip" \
-            --firefox-sources-zip "dist/anonymous-story-viewer-${RELEASE_TAG}-sources.zip"
+          pnpm submit:firefox "$GITHUB_WORKSPACE/dist/anonymous-story-viewer-${RELEASE_TAG}-firefox.zip" \
+            --firefox-sources-zip "$GITHUB_WORKSPACE/dist/anonymous-story-viewer-${RELEASE_TAG}-sources.zip"
