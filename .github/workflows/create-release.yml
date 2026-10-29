@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       tag_name:
-        description: 'Existing release tag to build, for example v1.0.0'
+        description: 'Existing release tag to build, for example v2.0.1'
         required: true
         type: string
 
@@ -24,7 +24,7 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
           ref: ${{ github.event_name == 'workflow_dispatch' && inputs.tag_name || github.ref }}
@@ -35,9 +35,9 @@ jobs:
           version: 11
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
-          node-version: 22
+          node-version: 24
           cache: pnpm
 
       - name: Install Dependencies
@@ -87,6 +87,8 @@ jobs:
             "dist/anonymous-story-viewer-${RELEASE_TAG}-chrome.zip"
           cp "apps/extension/.output/anonymous-story-viewer-${VERSION}-firefox.zip" \
             "dist/anonymous-story-viewer-${RELEASE_TAG}-firefox.zip"
+          cp "apps/extension/.output/anonymous-story-viewer-${VERSION}-sources.zip" \
+            "dist/anonymous-story-viewer-${RELEASE_TAG}-sources.zip"
           ls -lh dist/
 
       - name: Generate AI Release Notes via Gemini API
@@ -105,5 +107,6 @@ jobs:
           files: |
             dist/anonymous-story-viewer-${{ env.RELEASE_TAG }}-chrome.zip
             dist/anonymous-story-viewer-${{ env.RELEASE_TAG }}-firefox.zip
+            dist/anonymous-story-viewer-${{ env.RELEASE_TAG }}-sources.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

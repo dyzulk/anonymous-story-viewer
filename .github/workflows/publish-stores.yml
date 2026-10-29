@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       tag_name:
-        description: 'Release tag to publish (e.g., v2.0.0)'
+        description: 'Release tag to publish (e.g., v2.0.1)'
         required: true
         type: string
 
@@ -17,17 +17,13 @@ env:
   RELEASE_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.tag_name || github.event.release.tag_name }}
 
 jobs:
-  # ─── Stage 1: Build Extension Packages ─────────────────────────
-  build:
-    name: Build Extension Packages
+  publish:
+    name: Publish Extension to All Stores
     if: ${{ github.event_name == 'workflow_dispatch' || (github.event.release.tag_name != 'v2.0.0' && github.event.release.tag_name != '2.0.0') }}
     runs-on: ubuntu-latest
-    outputs:
-      version: ${{ steps.version.outputs.version }}
-
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           ref: ${{ env.RELEASE_TAG }}
 
@@ -37,83 +33,25 @@ jobs:
           version: 11
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
-          node-version: 22
+          node-version: 24
           cache: pnpm
 
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Extract Version from Tag
-        id: version
-        run: |
-          VERSION="${RELEASE_TAG#v}"
-          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
-          echo "Building version: $VERSION"
-
-      - name: Patch Package Version
+      - name: Download Release Packages
         env:
-          VERSION: ${{ steps.version.outputs.version }}
+          GH_TOKEN: ${{ github.token }}
         run: |
-          node -e "
-            const fs = require('fs');
-            const pkg = JSON.parse(fs.readFileSync('apps/extension/package.json', 'utf8'));
-            pkg.version = process.env.VERSION;
-            fs.writeFileSync('apps/extension/package.json', JSON.stringify(pkg, null, 2) + '\n');
-          "
+          set -euo pipefail
+          mkdir -p dist
+          # Download original release zip artifacts (Zero-Rebuild)
+          gh release download "$RELEASE_TAG" --dir dist --pattern "*.zip"
+          ls -lh dist/
 
-      - name: Typecheck
-        run: pnpm compile
-
-      - name: Build Chrome ZIP
-        run: pnpm zip
-
-      - name: Build Firefox ZIP
-        run: pnpm zip:firefox
-
-      - name: Upload Build Artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: extension-packages
-          retention-days: 1
-          path: |
-            apps/extension/.output/*-chrome.zip
-            apps/extension/.output/*-firefox.zip
-            apps/extension/.output/*-sources.zip
-
-  # ─── Stage 2: Publish to Chrome Web Store ──────────────────────
-  publish-chrome:
-    name: Publish → Chrome Web Store
-    needs: build
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ env.RELEASE_TAG }}
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 11
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: pnpm
-
-      - name: Install Dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Download Build Artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: extension-packages
-          path: .output
-
+      # ─── Step 1: Chrome Web Store ───
       - name: Publish to Chrome Web Store
         env:
           CHROME_EXTENSION_ID: ${{ secrets.CHROME_EXTENSION_ID }}
@@ -121,88 +59,23 @@ jobs:
           CHROME_CLIENT_SECRET: ${{ secrets.CHROME_CLIENT_SECRET }}
           CHROME_REFRESH_TOKEN: ${{ secrets.CHROME_REFRESH_TOKEN }}
         run: |
-          VERSION="${{ needs.build.outputs.version }}"
-          pnpm submit:chrome ".output/anonymous-story-viewer-${VERSION}-chrome.zip"
+          pnpm submit:chrome "dist/anonymous-story-viewer-${RELEASE_TAG}-chrome.zip"
 
-  # ─── Stage 2: Publish to Edge Add-ons ──────────────────────────
-  publish-edge:
-    name: Publish → Edge Add-ons
-    needs: build
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ env.RELEASE_TAG }}
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 11
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: pnpm
-
-      - name: Install Dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Download Build Artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: extension-packages
-          path: .output
-
+      # ─── Step 2: Edge Add-ons ───
       - name: Publish to Edge Add-ons
         env:
           EDGE_PRODUCT_ID: ${{ secrets.EDGE_PRODUCT_ID }}
           EDGE_CLIENT_ID: ${{ secrets.EDGE_CLIENT_ID }}
           EDGE_API_KEY: ${{ secrets.EDGE_API_KEY }}
         run: |
-          VERSION="${{ needs.build.outputs.version }}"
-          pnpm submit:edge ".output/anonymous-story-viewer-${VERSION}-chrome.zip"
+          pnpm submit:edge "dist/anonymous-story-viewer-${RELEASE_TAG}-chrome.zip"
 
-  # ─── Stage 2: Publish to Mozilla AMO ───────────────────────────
-  publish-firefox:
-    name: Publish → Mozilla AMO
-    needs: build
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ env.RELEASE_TAG }}
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4c
-        with:
-          version: 11
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: pnpm
-
-      - name: Install Dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Download Build Artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: extension-packages
-          path: .output
-
+      # ─── Step 3: Mozilla AMO ───
       - name: Publish to Mozilla AMO
         env:
           FIREFOX_EXTENSION_ID: ${{ secrets.AMO_EXTENSION_ID }}
           FIREFOX_JWT_ISSUER: ${{ secrets.AMO_JWT_ISSUER }}
           FIREFOX_JWT_SECRET: ${{ secrets.AMO_JWT_SECRET }}
         run: |
-          VERSION="${{ needs.build.outputs.version }}"
-          pnpm submit:firefox ".output/anonymous-story-viewer-${VERSION}-firefox.zip" \
-            --firefox-sources-zip ".output/anonymous-story-viewer-${VERSION}-sources.zip"
+          pnpm submit:firefox "dist/anonymous-story-viewer-${RELEASE_TAG}-firefox.zip" \
+            --firefox-sources-zip "dist/anonymous-story-viewer-${RELEASE_TAG}-sources.zip"
